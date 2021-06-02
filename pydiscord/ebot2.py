@@ -1,12 +1,39 @@
 #!/Users/sgs/disc/bin/python3
 
 import discord
+from discord.ext import tasks
+from discord.ext import commands
 import os
 
-client = discord.Client()
 
-@client.event
-async def on_ready(): print('We have logged in as {0.user}'.format(client))
+class MyClient(discord.Client):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # an attribute we can access from our task
+        self.counter = 0
+
+        # start the task to run in the background
+        self.my_background_task.start()
+
+    async def on_ready(self):
+        print(f'Logged in as {self.user} (ID: {self.user.id})')
+        print('------')
+
+    @tasks.loop(seconds=60) # task runs every 60 seconds
+    async def my_background_task(self):
+        #channel = self.get_channel(1234567) # channel ID goes here
+        channel = discord.utils.get(self.get_all_channels(),name='general')
+        self.counter += 1
+        await channel.send(self.counter)
+
+    @my_background_task.before_loop
+    async def before_my_task(self):
+        await self.wait_until_ready() # wait until the bot logs in
+
+
+#@client.event
+#async def on_ready(): print('We have logged in as {0.user}'.format(client))
 
 import imgkit
 
@@ -61,18 +88,17 @@ def check_for_new(sleeptime):
 
 
 #embed.set_image(url="attachment://hello.html")
-@client.event
-async def on_message(message):
 
-    if message.author == client.user:
-        return
+from discord.ext import tasks
 
+@tasks.loop(seconds=45.0, count=36000)
+async def sales_watcher():
     counter = 1
     import time
-    if message.content.startswith('$hello'):
+    if True:
         await message.channel.send('Hello!')
         first = True
-        while True:
+        if True:
             print("about to check")
             if first:
                 sleeptime = 9.0*7200.0
@@ -116,6 +142,7 @@ async def on_message(message):
             
         #await message.channel.send(file=file)
 
+client = MyClient()
 client.run(os.environ['BOTTOKEN'])
 
 
