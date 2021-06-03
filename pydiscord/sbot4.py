@@ -6,15 +6,9 @@ import os
 client = discord.Client()
 
 @client.event
-async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+async def on_ready(): print('We have logged in as {0.user}'.format(client))
 
 import imgkit
-imgkit.from_file('hello.html','hello.png')
-
-#file = discord.File("hello.html",filename="hello.html")
-file0 = discord.File("hello.png",filename="hello.png")
-
 
 def check_for_new(sleeptime):
    import requests
@@ -24,7 +18,7 @@ def check_for_new(sleeptime):
    now = time.time()
    tsince = now - sleeptime
    
-   querystring = {"only_opensea":"false","offset":"0","limit":"20","collection_slug":"veefriends","occurred_after":tsince,"event_type":"successful"}
+   querystring = {"only_opensea":"false","offset":"0","limit":"1","collection_slug":"veefriends","occurred_after":tsince,"event_type":"successful"}
    
    headers = {"Accept": "application/json"}
    
@@ -52,8 +46,9 @@ def check_for_new(sleeptime):
        assetname = asset["name"]
        cost = int(event["total_price"])/1000000000000000000.0
        buyer = event["winner_account"]["address"]
-       block = f'<img src="{imgsrc}">\n<p>\n<h1>{assetname}</h1>\n<p><h1>{cost}</h1>\n<p><h1>{buyer}</h1>\n<p>'
+       block = f'<img src="{imgsrc}">\n<p>\n<h1>Name:<br>{assetname}</h1>\n<p><h1>Price:<br>{cost:.5f} ETH</h1>\n<p><h1>Address:<br>{buyer}</h1>\n<p>'
        blocks.append(block)
+
 
    hhtml = hheader + ("<hr>\n").join(blocks) + "</html>"
    fileh = "block.%s.html" % now
@@ -61,7 +56,8 @@ def check_for_new(sleeptime):
    fout = open(fileh, "w")
    fout.write(hhtml)
    fout.close()
-   imgkit.from_file(fileh,filep)
+   options = { "transparent" : "" }
+   imgkit.from_file(fileh,filep,options=options)
    file_d = discord.File(filep,filename=filep)
    return(True, file_d)
 
@@ -81,7 +77,7 @@ async def on_message(message):
         while True:
             print("about to check")
             if first:
-                sleeptime = 3600.0
+                sleeptime = 103600.0
             else:
                 sleeptime = 20.0
              
